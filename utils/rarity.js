@@ -1,13 +1,13 @@
 const basePath = process.cwd();
 const fs = require("fs");
-const layersDir = `${basePath}/layers`;
+const path = require("path");
 
 const { layerConfigurations } = require(`${basePath}/src/config.js`);
 
 const { getElements } = require("../src/main.js");
 
 // read json data
-let rawdata = fs.readFileSync(`${basePath}/build/json/_metadata.json`);
+let rawdata = fs.readFileSync(path.join(basePath, 'build/json/_metadata.json'));
 let data = JSON.parse(rawdata);
 let editionSize = data.length;
 
@@ -20,7 +20,7 @@ layerConfigurations.forEach((config) => {
   layers.forEach((layer) => {
     // get elements for each layer
     let elementsForLayer = [];
-    let elements = getElements(`${layersDir}/${layer.name}/`);
+    let elements = getElements(path.join(basePath, 'layers', layer.name));
     elements.forEach((element) => {
       // just get name and weight for each element
       let rarityDataElement = {
@@ -33,7 +33,7 @@ layerConfigurations.forEach((config) => {
     let layerName =
       layer.options?.["displayName"] != undefined
         ? layer.options?.["displayName"]
-        : layer.name;
+        : layer.name.split('_').filter((attribute,index) => index !== 0).join('_');
     // don't include duplicate layers
     if (!rarityData.includes(layer.name)) {
       // add elements for each layer to chart

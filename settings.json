@@ -1,0 +1,11 @@
+{
+  "collectionName": "Collection Name",
+  "description": "Remember to replace this description",
+  "ipfsURI": "ipfs://NewUriToReplace",
+  "size": 100,
+  "imageFormat": {
+    "width": 512,
+    "height": 512,
+    "smoothing": false
+  }
+}

@@ -1,10 +1,11 @@
 const basePath = process.cwd();
 const { NETWORK } = require(`${basePath}/constants/network.js`);
 const fs = require("fs");
+const path = require("path");
 const sha1 = require(`${basePath}/node_modules/sha1`);
 const { createCanvas, loadImage } = require(`${basePath}/node_modules/canvas`);
-const buildDir = `${basePath}/build`;
-const layersDir = `${basePath}/layers`;
+const buildDir = path.join(basePath, 'build');
+const layersDir = path.join(basePath, 'layers');
 const {
   format,
   baseUri,
@@ -19,7 +20,6 @@ const {
   text,
   namePrefix,
   network,
-  solanaMetadata,
   gif,
 } = require(`${basePath}/src/config.js`);
 const canvas = createCanvas(format.width, format.height);
@@ -38,10 +38,10 @@ const buildSetup = () => {
     fs.rmdirSync(buildDir, { recursive: true });
   }
   fs.mkdirSync(buildDir);
-  fs.mkdirSync(`${buildDir}/json`);
-  fs.mkdirSync(`${buildDir}/images`);
+  fs.mkdirSync(path.join(buildDir, 'json'));
+  fs.mkdirSync(path.join(buildDir, 'images'));
   if (gif.export) {
-    fs.mkdirSync(`${buildDir}/gifs`);
+    fs.mkdirSync(path.join(buildDir, 'gifs'));
   }
 };
 
@@ -69,7 +69,7 @@ const cleanName = (_str) => {
 };
 
 const getElements = (path) => {
-  return fs
+  const elements = fs
     .readdirSync(path)
     .filter((item) => !/(^|\/)\.[^\/\.]/g.test(item))
     .map((i, index) => {
@@ -84,6 +84,8 @@ const getElements = (path) => {
         weight: getRarityWeight(i),
       };
     });
+    
+  return elements;
 };
 
 const layersSetup = (layersOrder) => {
@@ -141,32 +143,6 @@ const addMetadata = (_dna, _edition) => {
     attributes: attributesList,
     compiler: "HashLips Art Engine",
   };
-  if (network == NETWORK.sol) {
-    tempMetadata = {
-      //Added metadata for solana
-      name: tempMetadata.name,
-      symbol: solanaMetadata.symbol,
-      description: tempMetadata.description,
-      //Added metadata for solana
-      seller_fee_basis_points: solanaMetadata.seller_fee_basis_points,
-      image: `${_edition}.png`,
-      //Added metadata for solana
-      external_url: solanaMetadata.external_url,
-      edition: _edition,
-      ...extraMetadata,
-      attributes: tempMetadata.attributes,
-      properties: {
-        files: [
-          {
-            uri: `${_edition}.png`,
-            type: "image/png",
-          },
-        ],
-        category: "image",
-        creators: solanaMetadata.creators,
-      },
-    };
-  }
   metadataList.push(tempMetadata);
   attributesList = [];
 };
@@ -174,7 +150,7 @@ const addMetadata = (_dna, _edition) => {
 const addAttributes = (_element) => {
   let selectedElement = _element.layer.selectedElement;
   attributesList.push({
-    trait_type: _element.layer.name,
+    trait_type: _element.layer.name.split('_').filter((attribute,index) => index !== 0).join('_'),
     value: selectedElement.name,
   });
 };
@@ -335,6 +311,7 @@ function shuffle(array) {
 }
 
 const startCreating = async () => {
+  console.log('startCreating')
   let layerConfigIndex = 0;
   let editionCount = 1;
   let failedCount = 0;
