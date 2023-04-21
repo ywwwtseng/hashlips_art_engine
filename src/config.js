@@ -1,4 +1,6 @@
 const basePath = process.cwd();
+const fs = require('fs');
+const path = require('path');
 const { MODE } = require(`${basePath}/constants/blend_mode.js`);
 const { NETWORK } = require(`${basePath}/constants/network.js`);
 
@@ -21,19 +23,17 @@ const solanaMetadata = {
   ],
 };
 
+const layersOrder = fs
+  .readdirSync(path.join(basePath, 'layers'))
+  .filter(folder => folder[0] !== '.')
+  .sort((a, b) => Number(a[0]) - Number(b[0]))
+  .map(name => ({ name }));
+
 // If you have selected Solana then the collection starts from 0 automatically
 const layerConfigurations = [
   {
-    growEditionSizeTo: 5,
-    layersOrder: [
-      { name: "Background" },
-      { name: "Eyeball" },
-      { name: "Eye color" },
-      { name: "Iris" },
-      { name: "Shine" },
-      { name: "Bottom lid" },
-      { name: "Top lid" },
-    ],
+    growEditionSizeTo: 100,
+    layersOrder,
   },
 ];
 
